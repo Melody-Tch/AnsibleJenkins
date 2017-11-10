@@ -1,0 +1,50 @@
+---
+- hosts: localhost
+  remote_user: root
+  tasks:
+    - name: test connection
+      ping:
+    - name: Install Java
+      shell: "sudo yum install -y java-1.8.0-openjdk.x86_64"
+    - name: Install Git
+      shell: "sudo yum install -y git"
+    - name: Update yum
+      shell: "sudo yum update -y"
+    - name: Install Tomcat
+      shell: "sudo yum install -y tomcat"
+    - name: Install Tomcat extra
+      shell: "sudo yum install -y tomcat-webapps tomcat-admin-webapps"
+    - name: Enable tomcat
+      shell: "sudo systemctl enable tomcat"
+    - name: Start tomcat
+      shell: "sudo systemctl start tomcat"
+    - name: Make temp directory for git
+      shell: "mkdir -p test"
+    - name: Retrieving war file from repo
+      git:
+        repo: https://github.com/Melody-Tch/Maven-Selenium.git
+        dest: test
+    - name: moving file1 to tomcat
+      shell: "sudo cp test/HelloWorldJSP.war /usr/share/tomcat/webapps"
+    - name: moving file2 to tomcat
+      shell: "sudo cp test/InitialProjectTest.war /usr/share/tomcat/webapps"
+    - name: Restart Tom Cat
+      shell: "sudo systemctl restart tomcat"
+    - name: Install apache
+      shell: "sudo yum install -y httpd"
+    - name: Enable httpd
+      shell: "sudo systemctl enable httpd.service"
+    - name: Start httpd
+      shell: "sudo systemctl start httpd.service"
+    - name: Allow Permission for apache
+      shell: "sudo /usr/sbin/setsebool -P httpd_can_network_connect 1"
+    - name: reverse proxy apache to tomcat
+      shell: "sudo mv tomcat.conf /etc/httpd/conf.d"
+    - name: permission ofr tomcat.conf
+      shell: "sudo chcon -R --reference=/etc/httpd/conf.d/welcome.conf /etc/httpd/conf.d/tomcat.conf"
+    - name: restart apache
+      shell: "sudo systemctl restart httpd.service"
+    #sudo rm /etc/httpd/conf.d/tomcat.conf -r
+    #sudo vi /etc/httpd/conf.d/tomcat.conf
+#/var/lib/tomcat8/webapps
+      #note: it ends in an non-zero error code at the end but the application runs perfectly
